@@ -1,18 +1,38 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
 
 const LoginPage = () => {
+    const router = useRouter()
+    const [loading, setLoading] = useState(false)
+    const [buttonDisable, setButtonDisable] = useState(false)
     const [user, setUser] = useState({
         email: "",
         password: "",
 
     })
-    const onLogin = async () => {
-
+    const onLogin = async (e: any) => {
+        e.preventDefault()
+        try {
+            setLoading(true)
+            const response = await axios.post('/api/users/login', user)
+            console.log(response.data)
+            router.push('/profile')
+        } catch (error: any) {
+            console.log("Login Fail", error.message)
+        } finally {
+            setLoading(false)
+        }
     }
+    useEffect(() => {
+        if (user.email.length > 0 && user.password.length > 0) {
+            setButtonDisable(false);
+        } else {
+            setButtonDisable(true);
+        }
+    }, [user]);
     return (
         <div className="container bg-gray-700 max-w-full h-screen flex justify-center items-center ">
             <div className="max-w-sm mx-auto px-6">
@@ -20,7 +40,7 @@ const LoginPage = () => {
                     <div className="w-full relative">
                         <div className="md:mt-6">
                             <div className="text-center font-bold text-lg text-white">
-                                Login
+                                {loading ? "Loading..." : "Login"}
                             </div>
 
                             <form className="mt-8">
@@ -50,6 +70,6 @@ const LoginPage = () => {
             </div>
         </div>
     )
-}
 
+}
 export default LoginPage
